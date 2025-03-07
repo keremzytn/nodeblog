@@ -25,10 +25,11 @@ router.get('/new', (req, res) => {
 router.get('/:id', (req, res) => {
         Promise.all([
             Category.find({}).sort({ $natural: -1 }),
-            Post.findById(req.params.id).populate({path:'author', model: User}).sort({ $natural: -1 })
+            Post.findById(req.params.id).populate({path:'author', model: User}).sort({ $natural: -1 }),
+            Post.find({}).populate({path:'author', model: User}).sort({ $natural: -1 })
         ])
-        .then(([categories, post]) => {
-            res.render('site/post', { categories: categories, post: post });
+        .then(([categories, post, posts]) => {
+            res.render('site/post', { categories: categories, post: post , posts: posts});
         })
         .catch(error => {
             console.error("Veri çekme hatası:", error);
