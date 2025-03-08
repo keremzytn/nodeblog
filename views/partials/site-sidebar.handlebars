@@ -17,7 +17,7 @@
 
 	<div class="widget">
 		<h3 class="mb-3">Latest Posts</h3>
-        {{#each (limit posts 3)}}
+		{{#each (limit allPosts 3)}}
 		<div class="widget-post">
 			<a href="/posts/{{_id}}">
 				<img class="img-fluid" src="{{post_image}}" alt=""> {{title}}

@@ -16,8 +16,16 @@ router.get('/new', (req, res) => {
     })
 })
 
-router.get('/category/:categoryId', (req, res)=>{
-    Post.find({category: req.params.categoryId}).populate({path:'category', model: Category}).then(posts=>{
+router.get('/category/:categoryId', (req, res) => {
+    Promise.all([
+        Category.find({}).sort({ $natural: -1 }),
+        Post.find({category: req.params.categoryId})
+            .populate({ path: 'author', model: User })
+            .populate({ path: 'category', model: Category })
+            .sort({ $natural: -1 }),
+        Post.find({})
+            .populate({ path: 'author', model: User })
+            .sort({ $natural: -1 }),
         Category.aggregate([
             {
                 $lookup: {
@@ -38,10 +46,19 @@ router.get('/category/:categoryId', (req, res)=>{
                 $sort: { _id: -1 }
             }
         ])
-        .then(([categories, posts, categoryAggregated]) => {
-            res.render('site/blog', {categories: categories, posts: posts, categoryAggregated: categoryAggregated});
-        })
+    ])
+    .then(([categories, categoryPosts, allPosts, categoryAggregated]) => {
+        res.render('site/blog', {
+            categories: categories,
+            posts: categoryPosts,
+            allPosts: allPosts,
+            categoryAggregated: categoryAggregated
+        });
     })
+    .catch(error => {
+        console.error("Veri çekme hatası:", error);
+        res.status(500).send("Bir hata oluştu.");
+    });
 })
 
 router.get('/:id', (req, res) => {
